@@ -18,16 +18,24 @@ namespace MedicalSuppliesCatalog.Lab06.Controllers
         // GET: /AuditLogs?userName=...&action=...&result=...&startDate=...&endDate=...
         public async Task<IActionResult> Index(
             string? userName, 
-            string? action, 
+            string? logAction, 
             string? result, 
             DateTime? startDate, 
             DateTime? endDate)
         {
-            var logs = await _auditLogService.SearchLogsAsync(userName, action, result, startDate, endDate);
+            var logs = await _auditLogService.SearchLogsAsync(userName, logAction, result, startDate, endDate);
+            
+            // Perform integrity check for all displayed logs
+            var verification = new Dictionary<int, bool>();
+            foreach (var log in logs)
+            {
+                verification[log.Id] = _auditLogService.VerifyLog(log);
+            }
+            ViewBag.VerificationResults = verification;
             
             // Pass parameters back to View for persistent form values
             ViewData["userName"] = userName;
-            ViewData["action"] = action;
+            ViewData["logAction"] = logAction;
             ViewData["result"] = result;
             ViewData["startDate"] = startDate?.ToString("yyyy-MM-dd");
             ViewData["endDate"] = endDate?.ToString("yyyy-MM-dd");

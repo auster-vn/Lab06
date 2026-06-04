@@ -21,7 +21,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-bold text-secondary">Hành động</label>
-                <input type="text" name="action" value="@ViewData["action"]" class="form-control rounded-3" placeholder="e.g. Login, EditSupply" />
+                <input type="text" name="logAction" value="@ViewData["logAction"]" class="form-control rounded-3" placeholder="e.g. Login, EditSupply" />
             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-bold text-secondary">Kết quả</label>
@@ -88,6 +88,7 @@ else
                             <th>ID đối tượng</th>
                             <th class="text-center">Kết quả</th>
                             <th>IP Client</th>
+                            <th class="text-center">Toàn vẹn</th>
                             <th class="pe-4">Ghi chú</th>
                         </tr>
                     </thead>
@@ -111,6 +112,27 @@ else
                                     }
                                 </td>
                                 <td><small class="text-muted font-monospace">@log.IpAddress</small></td>
+                                <td class="text-center">
+                                    @{
+                                        var isVerified = false;
+                                        if (ViewBag.VerificationResults != null && ViewBag.VerificationResults.ContainsKey(log.Id))
+                                        {
+                                            isVerified = ViewBag.VerificationResults[log.Id];
+                                        }
+                                    }
+                                    @if (isVerified)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill" title="Mã băm hợp lệ, dữ liệu chưa bị chỉnh sửa.">
+                                            <i class="bi bi-shield-fill-check"></i> Khớp
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger text-white px-2 py-1 rounded-pill" title="CẢNH BÁO: Dữ liệu log đã bị sửa đổi trái phép hoặc không có chữ ký số!">
+                                            <i class="bi bi-shield-fill-x"></i> Lỗi Hash
+                                        </span>
+                                    }
+                                </td>
                                 <td class="pe-4 text-muted small">@log.Note</td>
                             </tr>
                         }

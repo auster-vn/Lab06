@@ -16,5 +16,6 @@ namespace MedicalSuppliesCatalog.Lab06.Models
         public string Result { get; set; } = "Success"; // "Success" or "Failed"
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? Note { get; set; }
+        public string? Hash { get; set; } // Cryptographic hash for tamper detection
     }
 }

@@ -40,18 +40,40 @@ namespace MedicalSuppliesCatalog.Lab06.Services
                 CreatedAt = DateTime.UtcNow
             };
 
+            // Calculate integrity check hash before saving
+            log.Hash = CalculateHash(log);
+
             try
             {
                 _context.AuditLogs.Add(log);
                 await _context.SaveChangesAsync();
 
                 // Structured logging for operations
-                _logger.LogInformation("Audit Logged: Action={Action}, Entity={EntityName}, Id={EntityId}, User={User}, IP={IP}, Result={Result}, Note={Note}",
-                    action, entityName, entityId, userName, ipAddress, result, note);
+                _logger.LogInformation("Audit Logged: Action={Action}, Entity={EntityName}, Id={EntityId}, User={User}, IP={IP}, Result={Result}, Note={Note}, Hash={Hash}",
+                    action, entityName, entityId, userName, ipAddress, result, note, log.Hash);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to write audit log to database.");
+            }
+        }
+
+        public bool VerifyLog(AuditLog log)
+        {
+            if (string.IsNullOrEmpty(log.Hash)) return false;
+            var calculated = CalculateHash(log);
+            return log.Hash == calculated;
+        }
+
+        private string CalculateHash(AuditLog log)
+        {
+            // Ticks must be formatted consistently, e.g. Ticks.ToString()
+            var data = $"{log.Action}|{log.EntityName}|{log.EntityId}|{log.UserName}|{log.IpAddress}|{log.Result}|{log.CreatedAt.Ticks}|MedicalSuppliesCatalogSecureKey2026";
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(data);
+                var hashBytes = sha256.ComputeHash(bytes);
+                return Convert.ToBase64String(hashBytes);
             }
         }
 
