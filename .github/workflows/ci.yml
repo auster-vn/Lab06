@@ -1,0 +1,30 @@
+name: Lab06 CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore Netcore/Lab06/MedicalSuppliesCatalog.Lab06.csproj
+
+    - name: Build project
+      run: dotnet build Netcore/Lab06/MedicalSuppliesCatalog.Lab06.csproj --no-restore -c Release
+
+    - name: Build Docker Image
+      run: |
+        cd Netcore/Lab06
+        docker build -t medical-supplies-lab06:latest .

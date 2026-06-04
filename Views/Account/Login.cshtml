@@ -1,0 +1,80 @@
+@model AccountLoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0 rounded-4" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
+                    <h2 class="fw-bold mt-2 text-dark">Đăng Nhập</h2>
+                    <p class="text-muted">Hệ thống Quản lý Vật tư Y tế</p>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control rounded-3" placeholder="name@example.com" />
+                        <label asp-for="Email">Địa chỉ Email</label>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control rounded-3" placeholder="Password" />
+                        <label asp-for="Password">Mật khẩu</label>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check mb-4 text-start">
+                        <input class="form-check-input" asp-for="RememberMe" />
+                        <label class="form-check-label text-secondary" asp-for="RememberMe">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-100 btn btn-lg btn-primary rounded-3 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="mb-0 text-secondary">Chưa có tài khoản? <a asp-controller="Account" asp-action="Register" class="text-primary fw-semibold">Đăng ký ngay</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <div class="card p-3 border-0 bg-light rounded-3 shadow-sm">
+                <span class="fw-bold text-secondary mb-2"><i class="bi bi-info-circle me-1"></i> Tài khoản Demo:</span>
+                <div class="row text-start small">
+                    <div class="col-6">
+                        <strong>Admin:</strong> admin@shop.test<br/>
+                        <strong>Staff:</strong> staff@shop.test<br/>
+                        <strong>User:</strong> user@shop.test
+                    </div>
+                    <div class="col-6">
+                        <strong>Pass:</strong> Admin@123<br/>
+                        <strong>Pass:</strong> Staff@123<br/>
+                        <strong>Pass:</strong> User@123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

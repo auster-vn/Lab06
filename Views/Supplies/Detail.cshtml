@@ -1,0 +1,184 @@
+@model MedicalSuppliesCatalog.Lab06.ViewModels.SupplyDetailViewModel
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@{
+    ViewData["Title"] = Model.SupplyName;
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-header bg-dark text-white p-4 rounded-top-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-secondary mb-2">@Model.CategoryName</span>
+                        <h2 class="fw-bold mb-0">@Model.SupplyName</h2>
+                    </div>
+                    <span class="fs-4 badge bg-light text-dark font-monospace px-3 py-2 rounded-3">@Model.SupplyCode</span>
+                </div>
+            </div>
+            
+            <div class="card-body p-5">
+                <!-- Quarantine Alert (Creative Feature) -->
+                @if (Model.IsQuarantined)
+                {
+                    <div class="alert alert-danger border-0 rounded-3 p-4 mb-4 shadow-sm d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-octagon-fill fs-1 text-danger"></i>
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1">CẢNH BÁO: VẬT TƯ ĐANG BỊ CÁCH LY</h5>
+                            <p class="mb-0 text-dark small">
+                                Vật tư này đang trong tình trạng cách ly kiểm chuẩn chất lượng hoặc sự cố kỹ thuật. Hệ thống đã khóa chức năng cấp phát cho đến khi được giải phóng.<br/>
+                                <strong>Lý do cách ly:</strong> <span class="fw-semibold">@Model.QuarantineReason</span>
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <div class="row g-4">
+                    <!-- Image Gallery Column -->
+                    <div class="col-md-4 text-center">
+                        <div class="mb-3">
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <img src="@Model.ImagePath" alt="@Model.SupplyName" class="img-fluid rounded border shadow-sm" style="max-height: 250px; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded border text-muted d-flex flex-column align-items-center justify-content-center shadow-sm" style="height: 250px;">
+                                    <i class="bi bi-image" style="font-size: 4rem;"></i>
+                                    <small class="mt-2 text-muted">Không có ảnh</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Details Column -->
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Nhà cung cấp</div>
+                                    <div class="fs-5 text-dark fw-semibold">@Model.Supplier</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Đơn giá</div>
+                                    <div class="fs-5 text-success fw-bold">@Model.UnitPrice.ToString("N0") VND</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Tồn kho / Định mức tối thiểu</div>
+                                    <div class="fs-5 text-dark fw-semibold">@Model.StockQuantity / @Model.MinimumStock</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Trạng thái</div>
+                                    <div class="mt-1">
+                                        @if (Model.IsQuarantined)
+                                        {
+                                            <span class="badge-quarantined">⚠ Cách ly</span>
+                                        }
+                                        else if (Model.Status == "Available")
+                                        {
+                                            <span class="badge-available">✓ Sẵn có</span>
+                                        }
+                                        else if (Model.Status == "Low Stock")
+                                        {
+                                            <span class="badge-low">⚠ Sắp hết</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-out">✗ Hết hàng</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Giá trị tồn kho</div>
+                                    <div class="fs-5 text-success fw-bold">@Model.InventoryValue.ToString("N0") VND</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <div class="text-secondary small fw-bold">Ngày khởi tạo (UTC)</div>
+                                    <div class="fs-5 text-dark fw-semibold small">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="mt-4">
+                        <h5 class="fw-bold mb-2">Mô tả chi tiết:</h5>
+                        <div class="p-3 bg-light rounded-3 border-start border-primary border-4 text-dark">
+                            @Model.Description
+                        </div>
+                    </div>
+                }
+
+                <!-- Quarantine Control Action Panel (Creative Feature) -->
+                @if ((await AuthorizationService.AuthorizeAsync(User, "CanManageProduct")).Succeeded)
+                {
+                    <div class="card border-danger border-opacity-50 mt-5 rounded-3">
+                        <div class="card-header bg-danger bg-opacity-10 text-danger py-3">
+                            <h5 class="fw-bold mb-0"><i class="bi bi-shield-exclamation me-2"></i>Bảng điều khiển kiểm soát cách ly (Admin Only)</h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-controller="Supplies" asp-action="ToggleQuarantine" asp-route-id="@Model.Id" method="post">
+                                @if (Model.IsQuarantined)
+                                {
+                                    <input type="hidden" name="isQuarantined" value="false" />
+                                    <p class="text-muted small">Nhấp vào nút dưới đây để giải phóng vật tư này khỏi trạng thái cách ly và cho phép tiếp tục cấp phát.</p>
+                                    <button type="submit" class="btn btn-success px-4 rounded-3 shadow-sm">
+                                        <i class="bi bi-shield-check me-1"></i> Giải phóng cách ly
+                                    </button>
+                                }
+                                else
+                                {
+                                    <input type="hidden" name="isQuarantined" value="true" />
+                                    <p class="text-muted small">Đưa vật tư vào trạng thái cách ly sẽ chặn mọi yêu cầu cấp phát kho cho vật tư này.</p>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small">Lý do cách ly:</label>
+                                        <input type="text" name="quarantineReason" class="form-control rounded-3" placeholder="e.g. Lỗi cảm biến nhiệt, Hết hạn kiểm chuẩn..." required />
+                                    </div>
+                                    <button type="submit" class="btn btn-danger px-4 rounded-3 shadow-sm">
+                                        <i class="bi bi-shield-x me-1"></i> Áp dụng cách ly
+                                    </button>
+                                }
+                            </form>
+                        </div>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 mt-5 border-top pt-4">
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "CanAdjustStock")).Succeeded)
+                    {
+                        <a asp-action="AdjustStock" asp-route-id="@Model.Id" class="btn btn-outline-info px-4 py-2 rounded-3 fw-semibold">
+                            <i class="bi bi-sliders me-1"></i> Điều chỉnh kho
+                        </a>
+                    }
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "CanManageProduct")).Succeeded)
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning text-dark px-4 py-2 rounded-3 fw-semibold">
+                            <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger px-4 py-2 rounded-3">
+                            <i class="bi bi-trash me-1"></i> Xóa mềm
+                        </a>
+                    }
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 rounded-3 ms-auto">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

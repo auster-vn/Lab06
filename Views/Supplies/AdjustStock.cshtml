@@ -1,0 +1,48 @@
+@model SupplyDetailViewModel
+@{
+    ViewData["Title"] = "Điều chỉnh tồn kho";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-warning text-dark py-3">
+                <h4 class="fw-bold mb-0"><i class="bi bi-gear-fill me-2"></i>Điều chỉnh tồn kho</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info border-0 rounded-3 small">
+                    <strong>Thông tin vật tư:</strong><br/>
+                    Mã vật tư: <code>@Model.SupplyCode</code><br/>
+                    Tên vật tư: <strong>@Model.SupplyName</strong><br/>
+                    Tồn kho hiện tại: <span class="badge bg-secondary fs-6">@Model.StockQuantity</span>
+                </div>
+
+                <form asp-controller="Supplies" asp-action="AdjustStock" asp-route-id="@Model.Id" method="post" class="mt-4">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- RowVersion hidden field for concurrency conflict checking -->
+                    <input type="hidden" name="rowVersionBase64" value="@ViewBag.RowVersionBase64" />
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Thay đổi số lượng:</label>
+                        <input type="number" name="stockQuantityChange" class="form-control form-control-lg rounded-3" 
+                               placeholder="e.g. 50 (tăng) hoặc -20 (giảm)" required />
+                        <div class="form-text text-muted">
+                            Nhập số dương để TĂNG thêm số lượng, số âm (có dấu trừ phía trước) để GIẢM bớt số lượng.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between gap-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                            Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-warning text-dark px-4 py-2 fw-semibold rounded-3 shadow-sm">
+                            <i class="bi bi-check-circle me-1"></i> Xác nhận thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

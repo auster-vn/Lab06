@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: medical-supplies-lab06
+    ports:
+      - "5012:80"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Data Source=data/MedicalSuppliesLab06.db
+    restart: always

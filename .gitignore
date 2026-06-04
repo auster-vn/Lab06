@@ -1,0 +1,25 @@
+## Build outputs
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+publish/
+
+## Tooling / IDEs
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Database & Logs
+logs/
+*.log
+*.db-shm
+*.db-wal
+data/
+
+## OS files
+.DS_Store
+Thumbs.db

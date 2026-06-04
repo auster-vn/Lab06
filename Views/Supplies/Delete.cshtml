@@ -1,0 +1,45 @@
+@model MedicalSuppliesCatalog.Lab06.ViewModels.SupplyDetailViewModel
+@{
+    ViewData["Title"] = "Xác nhận xóa";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger shadow border-opacity-50 rounded-4">
+            <div class="card-header bg-danger text-white p-4 rounded-top-4">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa mềm</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning border-0 rounded-3 mb-4 small">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Hành động này là XÓA MỀM:</strong> Vật tư y tế này sẽ bị tạm ẩn khỏi danh mục hoạt động chính và chuyển vào **Thùng rác**. Bạn hoàn toàn có thể khôi phục lại sau này nếu cần thiết.
+                </div>
+
+                <dl class="row g-2 mb-4 bg-light p-3 rounded-3 border">
+                    <dt class="col-sm-4 text-secondary small">Mã vật tư:</dt>
+                    <dd class="col-sm-8 font-monospace fw-bold">@Model.SupplyCode</dd>
+                    
+                    <dt class="col-sm-4 text-secondary small">Tên vật tư:</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.SupplyName</dd>
+                    
+                    <dt class="col-sm-4 text-secondary small">Danh mục:</dt>
+                    <dd class="col-sm-8"><span class="badge bg-secondary">@Model.CategoryName</span></dd>
+                    
+                    <dt class="col-sm-4 text-secondary small">Nhà cung cấp:</dt>
+                    <dd class="col-sm-8">@Model.Supplier</dd>
+                    
+                    <dt class="col-sm-4 text-secondary small">Số lượng tồn kho:</dt>
+                    <dd class="col-sm-8">@Model.StockQuantity</dd>
+                </dl>
+
+                <form asp-controller="Supplies" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2 justify-content-end border-top pt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4">Hủy bỏ</a>
+                    <button type="submit" class="btn btn-danger rounded-3 px-4 shadow-sm fw-semibold">
+                        <i class="bi bi-trash-fill me-1"></i> Chuyển vào Thùng rác
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

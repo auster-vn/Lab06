@@ -1,0 +1,122 @@
+@model List<MedicalSuppliesCatalog.Lab06.Models.AuditLog>
+@{
+    ViewData["Title"] = "Security Audit Logs";
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold"><i class="bi bi-shield-lock-fill me-2 text-danger"></i>Security Audit Logs</h1>
+        <p class="text-muted mb-0">Hệ thống giám sát và kiểm toán các hành vi nhạy cảm (Create, Edit, Concurrency, AccessDenied, Upload, Quarantine).</p>
+    </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <form method="get" asp-controller="AuditLogs" asp-action="Index" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-secondary">Tên tài khoản (Email)</label>
+                <input type="text" name="userName" value="@ViewData["userName"]" class="form-control rounded-3" placeholder="e.g. admin@shop.test" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-secondary">Hành động</label>
+                <input type="text" name="action" value="@ViewData["action"]" class="form-control rounded-3" placeholder="e.g. Login, EditSupply" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-secondary">Kết quả</label>
+                <select name="result" class="form-select rounded-3">
+                    <option value="">-- Tất cả --</option>
+                    <!---->
+                    @if (ViewData["result"]?.ToString() == "Success")
+                    {
+                        <option value="Success" selected>Thành công (Success)</option>
+                        <option value="Failed">Thất bại (Failed)</option>
+                    }
+                    else if (ViewData["result"]?.ToString() == "Failed")
+                    {
+                        <option value="Success">Thành công (Success)</option>
+                        <option value="Failed" selected>Thất bại (Failed)</option>
+                    }
+                    else
+                    {
+                        <option value="Success">Thành công (Success)</option>
+                        <option value="Failed">Thất bại (Failed)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2.5 col-lg-2">
+                <label class="form-label small fw-bold text-secondary">Từ ngày</label>
+                <input type="date" name="startDate" value="@ViewData["startDate"]" class="form-control rounded-3" />
+            </div>
+            <div class="col-md-2.5 col-lg-2">
+                <label class="form-label small fw-bold text-secondary">Đến ngày</label>
+                <input type="date" name="endDate" value="@ViewData["endDate"]" class="form-control rounded-3" />
+            </div>
+            <div class="col-12 d-flex gap-2 justify-content-end align-items-end mt-4">
+                <button type="submit" class="btn btn-dark rounded-3 px-4 shadow-sm">
+                    <i class="bi bi-funnel-fill me-1"></i> Lọc
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4">Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-5 text-center">
+            <i class="bi bi-clipboard-x fs-1 text-muted mb-3"></i>
+            <h5 class="fw-bold text-secondary">Không tìm thấy nhật ký kiểm toán nào</h5>
+            <p class="text-muted mb-0">Thử thay đổi bộ lọc tìm kiếm để xem thêm kết quả.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-4">Thời gian (UTC)</th>
+                            <th>Tài khoản</th>
+                            <th>Hành động</th>
+                            <th>Đối tượng</th>
+                            <th>ID đối tượng</th>
+                            <th class="text-center">Kết quả</th>
+                            <th>IP Client</th>
+                            <th class="pe-4">Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted small">@log.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td class="fw-semibold">@log.UserName</td>
+                                <td><span class="badge bg-secondary font-monospace px-2 py-1">@log.Action</span></td>
+                                <td>@log.EntityName</td>
+                                <td><code>@(string.IsNullOrEmpty(log.EntityId) ? "—" : log.EntityId)</code></td>
+                                <td class="text-center">
+                                    @if (log.Result == "Success")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">Success</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill">Failed</span>
+                                    }
+                                </td>
+                                <td><small class="text-muted font-monospace">@log.IpAddress</small></td>
+                                <td class="pe-4 text-muted small">@log.Note</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

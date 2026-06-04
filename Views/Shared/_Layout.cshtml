@@ -1,0 +1,155 @@
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Medical Supplies Lab06</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+        .badge-available { background-color: #d1e7dd; color: #0a3622; padding: 5px 12px; border-radius: 20px; font-weight: 600; }
+        .badge-low { background-color: #fff3cd; color: #664d03; padding: 5px 12px; border-radius: 20px; font-weight: 600; }
+        .badge-out { background-color: #f8d7da; color: #58151c; padding: 5px 12px; border-radius: 20px; font-weight: 600; }
+        .badge-quarantined { background-color: #e2d9ff; color: #2e008a; padding: 5px 12px; border-radius: 20px; font-weight: 600; }
+        .stat-card { transition: transform .2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .table-hover tbody tr:hover { background-color: #f0f7ff; }
+        .btn-action { border-radius: 8px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3">
+            <div class="container">
+                <a class="navbar-brand text-white" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-hospital text-info me-2"></i>Medical Supplies Lab06
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav me-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                                </a>
+                            </li>
+
+                            @if ((await AuthorizationService.AuthorizeAsync(User, "CanViewProduct")).Succeeded)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Supplies" asp-action="Index">
+                                        <i class="bi bi-box-seam me-1"></i> Supplies
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Requests" asp-action="Create">
+                                        <i class="bi bi-plus-circle me-1"></i> Issue Supply
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Requests" asp-action="History">
+                                        <i class="bi bi-clock-history me-1"></i> Issue History
+                                    </a>
+                                </li>
+                            }
+
+                            @if ((await AuthorizationService.AuthorizeAsync(User, "CanManageProduct")).Succeeded)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Supplies" asp-action="Trash">
+                                        <i class="bi bi-trash me-1"></i> Trash
+                                    </a>
+                                </li>
+                            }
+
+                            @if ((await AuthorizationService.AuthorizeAsync(User, "CanViewAuditLog")).Succeeded)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="AuditLogs" asp-action="Index">
+                                        <i class="bi bi-journal-text me-1"></i> Audit Logs
+                                    </a>
+                                </li>
+                            }
+                        }
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/health/ready">
+                                <i class="bi bi-heart-pulse me-1"></i> Health
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-info fw-bold" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i> Hello, @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="px-3 py-2">
+                                            <button type="submit" class="w-100 btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-box-arrow-left me-1"></i> Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-info px-4" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top text-muted mt-5 bg-white py-3 text-center">
+        <div class="container">
+            &copy; 2026 - Medical Supplies Catalog — ASP.NET Core Lab06
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
